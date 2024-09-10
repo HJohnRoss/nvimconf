@@ -92,7 +92,7 @@ vim.g.maplocalleader = ' '
 vim.opt.tabstop = 2
 vim.opt.shiftwidth = 2
 -- Set to true if you have a Nerd Font installed and selected in the terminal
-vim.g.have_nerd_font = true
+vim.g.have_nerd_font = false
 
 -- [[ Setting options ]]
 -- See `:help vim.opt`
@@ -611,7 +611,7 @@ require('lazy').setup({
             local servers = {
                 clangd = {},
                 -- gopls = {},
-                -- pyright = {},
+                pyright = {},
                 -- rust_analyzer = {},
                 -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
                 --
@@ -651,6 +651,8 @@ require('lazy').setup({
             local ensure_installed = vim.tbl_keys(servers or {})
             vim.list_extend(ensure_installed, {
                 'stylua', -- Used to format Lua code
+                'clang-format',
+                'python-lsp-server',
             })
             require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
@@ -689,7 +691,8 @@ require('lazy').setup({
                 -- Disable "format_on_save lsp_fallback" for languages that don't
                 -- have a well standardized coding style. You can add additional
                 -- languages here or re-enable it for the disabled ones.
-                local disable_filetypes = { c = true, cpp = true }
+                -- local disable_filetypes = { c = true, cpp = true }
+                local disable_filetypes = {}
                 -- local disable_filetypes = {}
                 local lsp_format_opt
                 if disable_filetypes[vim.bo[bufnr].filetype] then
@@ -704,10 +707,10 @@ require('lazy').setup({
             end,
             formatters_by_ft = {
                 lua = { 'stylua' },
-                c = { 'clangd' },
-                cpp = { 'clangd' },
+                c = { 'clang-format' },
+                cpp = { 'clang-format' },
                 -- Conform can also run multiple formatters sequentially
-                -- python = { "isort", "black" },
+                python = { 'python-lsp-server' },
                 --
                 -- You can use 'stop_after_first' to run the first available formatter from the list
                 -- javascript = { "prettierd", "prettier", stop_after_first = true },
@@ -735,12 +738,12 @@ require('lazy').setup({
                     -- `friendly-snippets` contains a variety of premade snippets.
                     --    See the README about individual language/framework/plugin snippets:
                     --    https://github.com/rafamadriz/friendly-snippets
-                    -- {
-                    --   'rafamadriz/friendly-snippets',
-                    --   config = function()
-                    --     require('luasnip.loaders.from_vscode').lazy_load()
-                    --   end,
-                    -- },
+                    {
+                        'rafamadriz/friendly-snippets',
+                        config = function()
+                            require('luasnip.loaders.from_vscode').lazy_load()
+                        end,
+                    },
                 },
             },
             'saadparwaiz1/cmp_luasnip',
@@ -843,6 +846,7 @@ require('lazy').setup({
             -- Like many other themes, this one has different styles, and you could load
             -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
             vim.cmd.colorscheme 'tokyonight-night'
+            -- vim.cmd.colorscheme 'default'
 
             -- You can configure highlights by doing something like:
             vim.cmd.hi 'Comment gui=none'
@@ -855,19 +859,7 @@ require('lazy').setup({
     { -- Collection of various small independent plugins/modules
         'echasnovski/mini.nvim',
         config = function()
-            -- Better Around/Inside textobjects
-            --
-            -- Examples:
-            --  - va)  - [V]isually select [A]round [)]paren
-            --  - yinq - [Y]ank [I]nside [N]ext [Q]uote
-            --  - ci'  - [C]hange [I]nside [']quote
             require('mini.ai').setup { n_lines = 500 }
-
-            -- Add/delete/replace surroundings (brackets, quotes, etc.)
-            --
-            -- - saiw) - [S]urround [A]dd [I]nner [W]ord [)]Paren
-            -- - sd'   - [S]urround [D]elete [']quotes
-            -- - sr)'  - [S]urround [R]eplace [)] [']
             require('mini.surround').setup()
 
             -- Simple and easy statusline.
@@ -895,7 +887,7 @@ require('lazy').setup({
         main = 'nvim-treesitter.configs', -- Sets main module to use for opts
         -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
         opts = {
-            ensure_installed = { 'bash', 'c', 'cpp', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' },
+            ensure_installed = { 'python', 'bash', 'c', 'cpp', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' },
             -- Autoinstall languages that are not installed
             auto_install = true,
             highlight = {
@@ -925,7 +917,7 @@ require('lazy').setup({
     --  Uncomment any of the lines below to enable them (you will need to restart nvim).
     --
     require 'kickstart.plugins.debug',
-    -- require 'kickstart.plugins.indent_line',
+    require 'kickstart.plugins.indent_line',
     require 'kickstart.plugins.lint',
     require 'kickstart.plugins.autopairs',
     require 'kickstart.plugins.neo-tree',
@@ -936,7 +928,7 @@ require('lazy').setup({
     --
     --  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
     --    For additional information, see `:help lazy.nvim-lazy.nvim-structuring-your-plugins`
-    -- { import = 'custom.plugins' },
+    { import = 'custom.plugins' },
 }, {
     ui = {
         -- If you are using a Nerd Font: set icons to an empty table which will use the
